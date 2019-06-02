@@ -1,0 +1,17 @@
+[package]
+name = "trace-context"
+description = "Extract and inject W3C TraceContext headers"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/watson/trace-context"
+homepage = "https://github.com/watson/trace-context"
+documentation = "https://docs.rs/runtime"
+authors = ["Thomas Watson <w@tson.dk>"]
+keywords = ["w3c", "traceparent", "tracestate", "tracecontext", "tracing"]
+categories = ["data-structures", "parser-implementations", "parsing", "value-formatting", "web-programming"]
+edition = "2018"
+
+[dependencies]
+http = "0.1.17"
+rand = "0.6.5"

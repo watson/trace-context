@@ -162,10 +162,6 @@ impl TraceContext {
         self.parent_id
     }
 
-    pub fn flags(&self) -> u8 {
-        self.flags
-    }
-
     /// Returns true if the trace is sampled
     ///
     /// ## Examples

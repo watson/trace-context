@@ -1,4 +1,4 @@
-//!  Extract and inject [W3C TraceContext](https://w3c.github.io/trace-context/) headers.
+//! Extract and inject [W3C TraceContext](https://w3c.github.io/trace-context/) headers.
 //!
 //! ## Examples
 //! ```
@@ -7,11 +7,14 @@
 //!     "traceparent",
 //!     "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01".parse().unwrap()
 //! );
-//! 
+//!
 //! let context = trace_context::TraceContext::extract(&headers).unwrap();
-//! 
-//! assert_eq!(context.trace_id(), u128::from_str_radix("0af7651916cd43dd8448eb211c80319c", 16).unwrap());
-//! assert_eq!(context.parent_id(), u64::from_str_radix("00f067aa0ba902b7", 16).ok());
+//!
+//! let trace_id = u128::from_str_radix("0af7651916cd43dd8448eb211c80319c", 16);
+//! let parent_id = u64::from_str_radix("00f067aa0ba902b7", 16);
+//!
+//! assert_eq!(context.trace_id(), trace_id.unwrap());
+//! assert_eq!(context.parent_id(), parent_id.ok());
 //! assert_eq!(context.sampled(), true);
 //! ```
 
@@ -36,13 +39,18 @@ impl TraceContext {
     /// ## Examples
     /// ```
     /// let mut headers = http::HeaderMap::new();
-    /// headers.insert("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01".parse().unwrap());
-    /// 
+    /// headers.insert(
+    ///   "traceparent",
+    ///   "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01".parse().unwrap()
+    /// );
+    ///
     /// let context = trace_context::TraceContext::extract(&headers).unwrap();
-    /// 
-    /// assert_eq!(context.trace_id(), u128::from_str_radix("0af7651916cd43dd8448eb211c80319c", 16).unwrap());
-    /// assert_eq!(context.parent_id(), u64::from_str_radix("00f067aa0ba902b7",
-    /// 16).ok());
+    ///
+    /// let trace_id = u128::from_str_radix("0af7651916cd43dd8448eb211c80319c", 16);
+    /// let parent_id = u64::from_str_radix("00f067aa0ba902b7", 16);
+    ///
+    /// assert_eq!(context.trace_id(), trace_id.unwrap());
+    /// assert_eq!(context.parent_id(), parent_id.ok());
     /// assert_eq!(context.sampled(), true);
     /// ```
     pub fn extract(headers: &http::HeaderMap) -> Result<Self, std::num::ParseIntError> {
@@ -64,6 +72,18 @@ impl TraceContext {
         })
     }
 
+    /// Generate a new TraceContect object without a parent.
+    ///
+    /// By default root TraceContext objects are sampled.
+    /// To mark it unsampled, call `context.set_sampled(false)`.
+    ///
+    /// ## Examples
+    /// ```
+    /// let context = trace_context::TraceContext::new_root();
+    ///
+    /// assert_eq!(context.parent_id(), None);
+    /// assert_eq!(context.sampled(), true);
+    /// ```
     pub fn new_root() -> Self {
         let mut rng = rand::thread_rng();
 
@@ -81,7 +101,10 @@ impl TraceContext {
     /// ## Examples
     /// ```
     /// let mut input_headers = http::HeaderMap::new();
-    /// input_headers.insert("traceparent", "00-00000000000000000000000000000001-0000000000000002-01".parse().unwrap());
+    /// input_headers.insert(
+    ///   "traceparent",
+    ///   "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01".parse().unwrap()
+    /// );
     ///
     /// let parent = trace_context::TraceContext::extract(&input_headers).unwrap();
     ///
@@ -99,6 +122,10 @@ impl TraceContext {
         headers.insert("traceparent", format!("{}", self).parse().unwrap());
     }
 
+    /// Generate a child of the current TraceContext and return it.
+    ///
+    /// The child will have a new randomly genrated `id` and its `parent_id` will be set to the
+    /// `id` of this TraceContext.
     pub fn child(&self) -> Self {
         let mut rng = rand::thread_rng();
 
@@ -111,18 +138,26 @@ impl TraceContext {
         }
     }
 
+    /// Return the id of the TraceContext.
     pub fn id(&self) -> u64 {
         self.id
     }
 
+    /// Return the version of the TraceContext spec used.
+    ///
+    /// You probably don't need this.
     pub fn version(&self) -> u8 {
         self.version
     }
 
+    /// Return the trace id of the TraceContext.
+    ///
+    /// All children will have the same `trace_id`.
     pub fn trace_id(&self) -> u128 {
         self.trace_id
     }
 
+    /// Return the id of the parent TraceContext.
     pub fn parent_id(&self) -> Option<u64> {
         self.parent_id
     }

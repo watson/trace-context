@@ -15,12 +15,18 @@ cargo add trace-context
 
 ```rust
 let mut headers = http::HeaderMap::new();
-headers.insert("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01".parse().unwrap());
+headers.insert(
+  "traceparent",
+  "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01".parse().unwrap()
+);
 
 let context = trace_context::TraceContext::extract(&headers).unwrap();
 
-assert_eq!(context.trace_id(), u128::from_str_radix("0af7651916cd43dd8448eb211c80319c", 16).unwrap());
-assert_eq!(context.parent_id(), u64::from_str_radix("00f067aa0ba902b7", 16).ok());
+let trace_id = u128::from_str_radix("0af7651916cd43dd8448eb211c80319c", 16);
+let parent_id = u64::from_str_radix("00f067aa0ba902b7", 16);
+
+assert_eq!(context.trace_id(), trace_id.unwrap());
+assert_eq!(context.parent_id(), trace_id.ok());
 assert_eq!(context.sampled(), true);
 ```
 

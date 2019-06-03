@@ -68,7 +68,7 @@ impl TraceContext {
             version: u8::from_str_radix(parts[0], 16)?,
             trace_id: u128::from_str_radix(parts[1], 16)?,
             parent_id: Some(u64::from_str_radix(parts[2], 16)?),
-            flags: u8::from_str_radix(parts[3], 16)?
+            flags: u8::from_str_radix(parts[3], 16)?,
         })
     }
 
@@ -92,7 +92,7 @@ impl TraceContext {
             version: 0,
             trace_id: rng.gen(),
             parent_id: None,
-            flags: 1
+            flags: 1,
         }
     }
 
